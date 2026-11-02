@@ -1,0 +1,3 @@
+,ordered,demand,waste_kits,waste_pct_of_ordered,stockout_kits,stockout_cases,fill_rate_pct,cost_$
+Baseline (same as last week),51820.0,48775.0,4290.0,8.278656889231957,1245.0,55.0,97.44746283956945,46080.0
+ML (gradient boosting),50917.0,48775.0,2833.0,5.5639570281045625,691.0,45.0,98.58329062019477,29643.0
