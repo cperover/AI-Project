@@ -83,6 +83,34 @@ def main():
 
     table.to_csv(ROOT / "data" / "inventory_results.csv")
 
+    # ---- 4. Breakdown by region and plan (same calculation, on each subset) ----
+    rows = []
+    for region in ["All"] + sorted(df.region.unique()):
+        for plan in ["All"] + sorted(df.plan.unique()):
+            part = df
+            if region != "All":
+                part = part[part.region == region]
+            if plan != "All":
+                part = part[part.plan == plan]
+            for name, col in methods.items():
+                rows.append({"region": region, "plan": plan, "forecast": name,
+                             **simulate(part, col, SAFETY_BUFFER)})
+    breakdown = pd.DataFrame(rows)
+    breakdown.to_csv(ROOT / "data" / "inventory_by_group.csv", index=False)
+
+    def show(title, region, plan, keys):
+        part = breakdown[(breakdown.region.isin(region)) & (breakdown.plan.isin(plan))]
+        view = part.pivot(index=keys, columns="forecast",
+                          values=["waste_kits", "stockout_kits", "cost_$"])
+        print(f"=== {title} (buffer {SAFETY_BUFFER:.0%}) ===")
+        print(view.round(0).astype(int).to_string(), "\n")
+
+    regions = sorted(df.region.unique())
+    plans = sorted(df.plan.unique())
+    show("By region", regions, ["All"], "region")
+    show("By plan", ["All"], plans, "plan")
+    show("By region and plan", regions, plans, ["region", "plan"])
+
     # ---- Charts ----
     (ROOT / "report").mkdir(exist_ok=True)
     colors = ["tab:orange", "tab:blue"]
